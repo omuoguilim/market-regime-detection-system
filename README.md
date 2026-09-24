@@ -1,6 +1,6 @@
 # Regime Lab
 
-A market-regime research app by Oluchi Muoguilim, with a Python pipeline and an interactive HTML dashboard.
+A market-regime research app, with a Python pipeline and an interactive HTML dashboard.
 
 ## Repository status
 
