@@ -154,12 +154,17 @@ def metrics(ledger):
                 sum_cost_fractions=float(ledger.cost_fraction.sum()))
 
 
-def run(path, out, initial_train=1260, block=63, fee_bps=5, slippage_bps=2):
+def run(path, out, initial_train=1260, block=63, fee_bps=5, slippage_bps=2, symbol='^GSPC', feed='historical-csv'):
     if initial_train < 100 or block < 1 or min(fee_bps, slippage_bps) < 0:
         raise ValueError('Invalid training, block, or cost settings.')
     out = Path(out)
     out.mkdir(parents=True, exist_ok=False)
     data = prepare(path)
+    metadata_path=Path(str(path)+'.meta.json')
+    if metadata_path.exists():
+        metadata=json.loads(metadata_path.read_text())
+        if metadata['symbol']!=symbol or metadata['feed']!=feed:
+            raise ValueError('Symbol/feed arguments differ from the source metadata')
     features = data.dropna(subset=FEATURES)
     if len(features) <= initial_train + 2:
         raise ValueError('Not enough observations for training and execution.')
@@ -173,7 +178,8 @@ def run(path, out, initial_train=1260, block=63, fee_bps=5, slippage_bps=2):
         probs = filter_states(model, scaler.transform(test[FEATURES]), previous)
         fold_id = len(folds)
         artifact = dict(model=model, scaler=scaler, state_order=order, feature_names=FEATURES,
-                        train_end=str(train.index[-1].date()))
+                        train_end=str(train.index[-1].date()),symbol=symbol,feed=feed,
+                        training_source_hash=hashlib.sha256(data.loc[:train.index[-1],['Open','High','Low','Close','Volume']].to_csv().encode()).hexdigest())
         joblib.dump(artifact, out/f'model_{fold_id:03d}.joblib')
         aligned = []
         for candidate_seed, candidate in pool:
@@ -208,7 +214,8 @@ def run(path, out, initial_train=1260, block=63, fee_bps=5, slippage_bps=2):
                     train_end=str(train.index[-1].date()), test_start=str(test.index[0].date()),
                     test_end=str(test.index[-1].date()), selected_seed=seed,
                     state_order=order.tolist(), raw_means=scaler.inverse_transform(model.means_).tolist(),
-                    transitions=model.transmat_.tolist(), diagnostics=diagnostics)
+                    transitions=model.transmat_.tolist(), diagnostics=diagnostics,
+                    return_variances=(model.covars_[:,0,0]*scaler.scale_[0]**2).tolist())
         folds.append(fold)
         print(f'Fold {fold_id}: trained through {fold["train_end"]}, predicted through {fold["test_end"]}', flush=True)
     signals = pd.DataFrame(predictions).set_index('Date')
@@ -226,8 +233,13 @@ def run(path, out, initial_train=1260, block=63, fee_bps=5, slippage_bps=2):
         summary[name] = metrics(ledger)
     versions = {name:importlib.metadata.version(name) for name in
                 ['numpy', 'pandas', 'scipy', 'scikit-learn', 'hmmlearn', 'joblib']}
+    try:
+        source_location=str(Path(path).resolve().relative_to(Path(__file__).resolve().parent))
+    except ValueError:
+        source_location=str(Path(path).resolve())
     manifest = dict(source_sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest(),
-                    python=platform.python_version(), packages=versions,
+                    python=platform.python_version(), packages=versions,symbol=symbol,feed=feed,
+                    data_file=source_location,
                     input_rows=len(data), feature_rows=len(features),
                     volume_imputed_dates=[str(d.date()) for d in data.index[data.Volume_imputed]],
                     initial_train=initial_train, refit_every=block,
@@ -247,5 +259,7 @@ if __name__ == '__main__':
     parser.add_argument('--block', type=int, default=63)
     parser.add_argument('--fee-bps', type=float, default=5)
     parser.add_argument('--slippage-bps', type=float, default=2)
+    parser.add_argument('--symbol',default='^GSPC')
+    parser.add_argument('--feed',default='historical-csv')
     args = parser.parse_args()
-    run(args.data, args.out, args.initial_train, args.block, args.fee_bps, args.slippage_bps)
+    run(args.data, args.out, args.initial_train, args.block, args.fee_bps, args.slippage_bps,args.symbol,args.feed)

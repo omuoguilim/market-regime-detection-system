@@ -7,3 +7,7 @@ results/run_*/
 *.joblib
 /results/*/dashboard.html
 /results/run_*/
+
+.env
+journal/
+*.meta.json

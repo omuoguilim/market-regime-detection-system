@@ -1,4 +1,4 @@
-"""Open the bundled research dashboard; no third-party packages required."""
+"""Open an existing research run or train a new daily model."""
 import argparse
 import datetime as dt
 import subprocess
@@ -15,11 +15,14 @@ def main():
     parser.add_argument('--retrain', action='store_true', help='Fit a fresh, timestamped run using installed research dependencies.')
     parser.add_argument('--run', type=Path, help='Open a different completed run folder.')
     parser.add_argument('--no-browser', action='store_true')
+    parser.add_argument('--data',type=Path,default=ROOT/'data/sp500_clean.csv')
+    parser.add_argument('--symbol',default='^GSPC')
+    parser.add_argument('--feed',default='historical-csv')
     args = parser.parse_args()
     run = args.run
     if args.retrain:
         run = ROOT/'results'/('run_'+dt.datetime.now().strftime('%Y%m%d_%H%M%S_%f'))
-        subprocess.run([sys.executable, str(ROOT/'pipeline.py'), '--data', str(ROOT/'data/sp500_clean.csv'), '--out', str(run)], cwd=ROOT, check=True)
+        subprocess.run([sys.executable, str(ROOT/'pipeline.py'), '--data', str(args.data), '--out', str(run),'--symbol',args.symbol,'--feed',args.feed], cwd=ROOT, check=True)
     if run is None:
         candidates = [p.parent for p in (ROOT/'results').glob('*/run.json') if (p.parent/'analysis/comparison.json').exists()]
         run = max(candidates, key=lambda p:(p/'run.json').stat().st_mtime) if candidates else ROOT/'example_phase1'

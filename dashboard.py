@@ -1,4 +1,4 @@
-"""Build an offline dashboard from actual CSV/JSON results, never model pickles."""
+"""Build an offline HTML dashboard; model files are never sent to the browser."""
 import csv
 import hashlib
 import json
@@ -22,7 +22,8 @@ def number(value):
 def build(root, run):
     root, run = Path(root), Path(run)
     manifest = json.loads((run/'run.json').read_text())
-    source = root/'data/sp500_clean.csv'
+    source = Path(manifest.get('data_file',root/'data/sp500_clean.csv'))
+    if not source.is_absolute():source=root/source
     if hashlib.sha256(source.read_bytes()).hexdigest() != manifest['source_sha256']:
         raise ValueError('The source CSV does not match the selected run. Dashboard not rebuilt.')
     analysis = run/'analysis'
@@ -46,6 +47,14 @@ def build(root, run):
     payload = dict(run=run.name, manifest=manifest, comparison=comparison, signals=signals, ledgers=ledgers,
                    folds=json.loads((run/'folds.json').read_text()), lineage=rows(analysis/'lineage.csv'),
                    buckets=rows(analysis/'diagnostic_buckets.csv'))
+    assessment_path=run/'assessment.json'
+    if not assessment_path.exists():
+        from assessment import study
+        study(source,run)
+    assessment=json.loads(assessment_path.read_text())
+    if assessment['source_sha256']!=manifest['source_sha256']:
+        raise ValueError('Assessment study belongs to a different input')
+    payload['assessment']=assessment
     template = (root/'dashboard.html').read_text()
     # Escape script terminators even if an imported file contains unusual text.
     encoded = json.dumps(payload,allow_nan=False).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
