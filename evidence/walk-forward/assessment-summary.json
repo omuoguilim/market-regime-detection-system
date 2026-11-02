@@ -1,0 +1,39 @@
+{
+  "source_sha256": "102729549fc4cff9d9f8191aea0603bce77f5bb0cb26c7f904a29c7063f118ad",
+  "mode": "retrospective",
+  "target": "Next 5 sessions: annualized RMS daily returns",
+  "policy": {
+    "entropy_max": 0.75,
+    "vote_disagreement_max": 0.34,
+    "unusual_training_quantile": 0.99,
+    "flips_max": 2,
+    "flip_window": 5,
+    "horizon": 5
+  },
+  "policy_status": "Chosen after historical exploration, not a validated threshold",
+  "comparison": {
+    "all": {
+      "assessments": 2733,
+      "scored": 2728,
+      "model_rmse": 0.10657738694607996,
+      "baseline_rmse": 0.0994850593185818,
+      "mean_realized_risk": 0.14058575768944054
+    },
+    "kept": {
+      "assessments": 2670,
+      "scored": 2665,
+      "model_rmse": 0.08963961823123506,
+      "baseline_rmse": 0.08280790390150723,
+      "mean_realized_risk": 0.13385326389811678
+    },
+    "withheld": {
+      "assessments": 63,
+      "scored": 63,
+      "model_rmse": 0.38980398255249216,
+      "baseline_rmse": 0.37215523692675023,
+      "mean_realized_risk": 0.425380931560517
+    },
+    "coverage": 0.9769484083424808,
+    "pending": 5
+  }
+}

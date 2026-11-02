@@ -35,6 +35,10 @@ The rules were chosen after historical exploration. This is not an untouched hol
 
 ## Run the historical research
 
+### Verify the saved results without retraining
+
+I include the run manifest, execution ledgers and assessment output in [evidence/](evidence/README.md). `python3 verify_evidence.py` independently recomputes the reported strategy metrics using only the Python standard library. The saved run has 4,023 source observations and 2,733 assessment sessions; those counts describe different stages of the pipeline.
+
 I use Python 3.12 and the pinned dependencies.
 
 ```sh
