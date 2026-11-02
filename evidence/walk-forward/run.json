@@ -1,0 +1,64 @@
+{
+  "source_sha256": "102729549fc4cff9d9f8191aea0603bce77f5bb0cb26c7f904a29c7063f118ad",
+  "python": "3.12.14",
+  "packages": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "hmmlearn": "0.3.3",
+    "joblib": "1.5.3"
+  },
+  "input_rows": 4023,
+  "feature_rows": 3993,
+  "volume_imputed_dates": [
+    "2023-05-24"
+  ],
+  "initial_train": 1260,
+  "refit_every": 63,
+  "fee_bps": 5,
+  "slippage_bps": 2,
+  "results": {
+    "buy_hold": {
+      "final_value": 3.2652699989038627,
+      "total_return": 2.2652699989038627,
+      "cagr": 0.11520168875464232,
+      "annual_volatility": 0.15748139097229227,
+      "sharpe_zero_rf": 0.7724082535013423,
+      "max_drawdown": -0.3223653673253182,
+      "turnover": 2.0,
+      "sum_cost_fractions": 0.0014
+    },
+    "stocks60_cash40": {
+      "final_value": 2.0944707545300894,
+      "total_return": 1.0944707545300894,
+      "cagr": 0.07049429286968212,
+      "annual_volatility": 0.09448839651378764,
+      "sharpe_zero_rf": 0.7693602218187517,
+      "max_drawdown": -0.20622115676672725,
+      "turnover": 5.662294753136291,
+      "sum_cost_fractions": 0.003963606327195403
+    },
+    "hard_hmm": {
+      "final_value": 1.6435955736076306,
+      "total_return": 0.6435955736076306,
+      "cagr": 0.04684824941928167,
+      "annual_volatility": 0.07979015035408794,
+      "sharpe_zero_rf": 0.614714842759623,
+      "max_drawdown": -0.15746452027306623,
+      "turnover": 67.38341363880636,
+      "sum_cost_fractions": 0.04716838954716445
+    },
+    "probability_hmm": {
+      "final_value": 1.5994925457580156,
+      "total_return": 0.5994925457580156,
+      "cagr": 0.04422787936728545,
+      "annual_volatility": 0.07890502962917405,
+      "sharpe_zero_rf": 0.5888967406874159,
+      "max_drawdown": -0.14781501755622906,
+      "turnover": 71.4794051505126,
+      "sum_cost_fractions": 0.05003558360535882
+    }
+  },
+  "status": "retrospective walk-forward research, not untouched holdout"
+}
